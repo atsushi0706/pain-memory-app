@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEURAL MEMORY ATLAS | 痛みの記憶 診断システム</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #050810;
+    --bg-2: #0a0f1c;
+    --panel: #0d1424;
+    --border: #1a2540;
+    --gold: #d4a857;
+    --gold-glow: #ffd68a;
+    --text: #e8ecf3;
+    --text-dim: #7a8699;
+    --nerve: #4fc3f7;
+    --nerve-glow: #81d4fa;
+    --danger: #ff6b6b;
+  }
+  body {
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+    background: radial-gradient(ellipse at top, #0a1428 0%, #050810 70%);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  .header {
+    padding: 18px 30px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(13, 20, 36, .85);
+    backdrop-filter: blur(10px);
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 14px;
+  }
+  .logo-mark {
+    width: 34px; height: 34px; border: 1.5px solid var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--gold); font-weight: 700; font-size: 14px;
+    box-shadow: 0 0 12px rgba(212, 168, 87, .3);
+  }
+  .logo-text h1 { font-size: 15px; letter-spacing: .18em; color: var(--gold); font-weight: 600; }
+  .logo-text .sub { font-size: 10px; letter-spacing: .25em; color: var(--text-dim); margin-top: 2px; }
+  .status { font-size: 10px; letter-spacing: .2em; color: var(--text-dim); }
+  .status .dot {
+    display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    background: #4ade80; margin-right: 6px; vertical-align: middle;
+    box-shadow: 0 0 8px #4ade80;
+  }
+
+  .main {
+    display: grid;
+    grid-template-columns: minmax(380px, 1fr) 1.2fr;
+    gap: 24px;
+    padding: 24px 30px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  @media (max-width: 900px) {
+    .main { grid-template-columns: 1fr; }
+  }
+
+  /* ===== Anatomy Panel ===== */
+  .anatomy-panel {
+    background: linear-gradient(180deg, #0a1020 0%, #050810 100%);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 20px;
+    position: relative;
+    min-height: 720px;
+    display: flex; flex-direction: column;
+  }
+  .anatomy-panel::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  .anatomy-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 12px; padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .anatomy-title { font-size: 11px; letter-spacing: .2em; color: var(--gold); }
+  .view-toggle { display: flex; gap: 6px; }
+  .view-btn {
+    background: transparent; border: 1px solid var(--border);
+    color: var(--text-dim); padding: 5px 12px; font-size: 10px;
+    letter-spacing: .1em; cursor: pointer; font-family: inherit;
+    transition: all .2s;
+  }
+  .view-btn.active {
+    color: var(--gold); border-color: var(--gold);
+    box-shadow: 0 0 10px rgba(212, 168, 87, .2);
+  }
+  .view-btn:hover { color: var(--text); }
+
+  .svg-wrap {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .svg-wrap svg { max-height: 640px; width: auto; }
+
+  /* Body shape */
+  .body-outline {
+    fill: url(#bodyGradient);
+    stroke: #2a3555;
+    stroke-width: 1;
+    filter: drop-shadow(0 0 12px rgba(79, 195, 247, .08));
+  }
+  .body-inner { fill: #0a1020; opacity: .3; }
+
+  /* Clickable regions */
+  .region {
+    fill: rgba(79, 195, 247, .08);
+    stroke: rgba(79, 195, 247, .5);
+    stroke-width: 1.2;
+    stroke-dasharray: 4 3;
+    cursor: pointer;
+    transition: all .25s;
+  }
+  .region:hover {
+    fill: rgba(212, 168, 87, .28);
+    stroke: var(--gold);
+    stroke-width: 1.8;
+    stroke-dasharray: none;
+    filter: drop-shadow(0 0 10px rgba(212, 168, 87, .7));
+  }
+  .region.active {
+    fill: rgba(212, 168, 87, .25);
+    stroke: var(--gold);
+    filter: drop-shadow(0 0 12px var(--gold));
+  }
+
+  /* Nerve paths */
+  .nerve-path {
+    fill: none;
+    stroke: rgba(79, 195, 247, .25);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    transition: all .4s;
+  }
+  .nerve-path.highlight {
+    stroke: var(--gold-glow);
+    stroke-width: 2.5;
+    filter: drop-shadow(0 0 6px var(--gold)) drop-shadow(0 0 12px var(--gold));
+    animation: pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; stroke-width: 2.5; }
+    50% { opacity: .6; stroke-width: 3.5; }
+  }
+
+  .region-label {
+    font-size: 9px; fill: var(--text-dim);
+    font-family: monospace; letter-spacing: .1em;
+    pointer-events: none; text-anchor: middle;
+  }
+
+  .hud-top-left, .hud-top-right, .hud-bottom {
+    position: absolute; font-size: 9px; letter-spacing: .15em;
+    color: var(--text-dim); font-family: monospace;
+  }
+  .hud-top-left { top: 60px; left: 28px; }
+  .hud-top-right { top: 60px; right: 28px; text-align: right; }
+  .hud-bottom { bottom: 20px; left: 28px; }
+  .hud-bottom .val { color: var(--gold); }
+
+  /* ===== Info Panel ===== */
+  .info-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 28px;
+    min-height: 720px;
+    position: relative;
+  }
+  .info-panel::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  .step-label {
+    font-size: 10px; letter-spacing: .25em; color: var(--gold);
+    margin-bottom: 6px;
+  }
+  .step-title {
+    font-size: 17px; color: var(--text); margin-bottom: 20px;
+    padding-bottom: 14px; border-bottom: 1px solid var(--border);
+    letter-spacing: .03em;
+  }
+  .help-text { font-size: 12px; color: var(--text-dim); margin-bottom: 16px; line-height: 1.8; }
+
+  .action-list { display: flex; flex-direction: column; gap: 8px; max-height: 560px; overflow-y: auto; padding-right: 6px; }
+  .action-list::-webkit-scrollbar { width: 6px; }
+  .action-list::-webkit-scrollbar-thumb { background: var(--border); }
+  .action-item {
+    padding: 14px 16px;
+    background: rgba(79, 195, 247, .03);
+    border: 1px solid var(--border);
+    border-left: 2px solid var(--gold);
+    color: var(--text); font-size: 13px; cursor: pointer;
+    transition: all .2s;
+  }
+  .action-item:hover {
+    background: rgba(212, 168, 87, .08);
+    border-left-color: var(--gold-glow);
+    transform: translateX(3px);
+    box-shadow: 0 0 15px rgba(212, 168, 87, .15);
+  }
+  .action-item .id {
+    display: inline-block; font-size: 9px; color: var(--gold);
+    font-family: monospace; letter-spacing: .1em; margin-right: 10px;
+  }
+  .empty-hint {
+    padding: 40px 20px; text-align: center;
+    color: var(--text-dim); font-size: 12px;
+    border: 1px dashed var(--border);
+  }
+
+  .question-box {
+    background: rgba(79, 195, 247, .03);
+    border: 1px solid var(--border);
+    border-left: 2px solid var(--gold);
+    padding: 18px 20px; margin-bottom: 14px;
+  }
+  .q-num { font-size: 9px; color: var(--gold); letter-spacing: .2em; }
+  .q-text { color: var(--text); margin: 6px 0 14px; font-size: 14px; }
+  .q-options { display: flex; flex-wrap: wrap; gap: 8px; }
+  .opt-btn {
+    padding: 9px 16px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 12px; font-family: inherit; cursor: pointer;
+    transition: all .2s;
+  }
+  .opt-btn:hover { border-color: var(--gold); color: var(--text); }
+  .opt-btn.selected {
+    background: rgba(212, 168, 87, .15);
+    border-color: var(--gold);
+    color: var(--gold-glow);
+    box-shadow: 0 0 8px rgba(212, 168, 87, .3);
+  }
+
+  .nav-buttons { display: flex; justify-content: space-between; gap: 10px; margin-top: 20px; }
+  .btn {
+    padding: 12px 24px; border: 1px solid var(--border);
+    background: transparent; color: var(--text-dim);
+    font-family: inherit; font-size: 12px; letter-spacing: .1em;
+    cursor: pointer; transition: all .2s;
+  }
+  .btn-primary {
+    border-color: var(--gold); color: var(--gold);
+    background: rgba(212, 168, 87, .08);
+  }
+  .btn-primary:hover { background: rgba(212, 168, 87, .2); box-shadow: 0 0 15px rgba(212, 168, 87, .3); }
+  .btn-primary:disabled { opacity: .3; cursor: not-allowed; }
+  .btn-secondary:hover { color: var(--text); border-color: var(--text-dim); }
+
+  /* ===== Result ===== */
+  .result-top {
+    padding: 16px; background: rgba(212, 168, 87, .05);
+    border: 1px solid var(--gold); margin-bottom: 20px;
+  }
+  .result-top .label { font-size: 9px; letter-spacing: .2em; color: var(--gold); }
+  .result-top .action-name { font-size: 14px; color: var(--text); margin-top: 4px; }
+
+  .section-label {
+    font-size: 10px; letter-spacing: .2em; color: var(--gold);
+    margin: 18px 0 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border);
+  }
+
+  .nerve-card {
+    padding: 14px 16px; margin-bottom: 10px;
+    background: rgba(79, 195, 247, .03);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--nerve);
+  }
+  .nerve-card.r1 {
+    border-left: 3px solid var(--gold);
+    background: linear-gradient(90deg, rgba(212, 168, 87, .1), transparent);
+    box-shadow: 0 0 20px rgba(212, 168, 87, .1);
+  }
+  .nerve-rank {
+    font-size: 9px; letter-spacing: .2em;
+    color: var(--text-dim); font-family: monospace;
+  }
+  .nerve-card.r1 .nerve-rank { color: var(--gold); }
+  .nerve-name { font-size: 14px; color: var(--text); margin: 4px 0; font-weight: 600; }
+  .nerve-prob-wrap {
+    display: flex; align-items: center; gap: 10px; margin-top: 8px;
+  }
+  .prob-bar { flex: 1; height: 4px; background: var(--border); overflow: hidden; }
+  .prob-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-glow)); box-shadow: 0 0 6px var(--gold); }
+  .prob-val { font-family: monospace; font-size: 12px; color: var(--gold); min-width: 38px; text-align: right; }
+  .nerve-cond { font-size: 11px; color: var(--text-dim); margin-top: 6px; }
+
+  .detail-card {
+    padding: 14px 16px; background: rgba(79, 195, 247, .02);
+    border: 1px solid var(--border); margin-bottom: 10px;
+    font-size: 12px; color: var(--text); line-height: 1.8;
+  }
+  .locked-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .locked-tag {
+    padding: 4px 10px; font-size: 10px;
+    background: rgba(212, 168, 87, .08);
+    border: 1px solid rgba(212, 168, 87, .4);
+    color: var(--gold);
+  }
+  .advice-card {
+    padding: 16px; background: rgba(212, 168, 87, .05);
+    border: 1px solid var(--gold); margin-top: 10px;
+    font-size: 12px; color: var(--text); line-height: 1.9;
+  }
+  .cta {
+    margin-top: 24px; padding: 22px;
+    background: linear-gradient(135deg, rgba(212, 168, 87, .15), rgba(79, 195, 247, .05));
+    border: 1px solid var(--gold); text-align: center;
+  }
+  .cta h3 { color: var(--gold); font-size: 14px; margin-bottom: 8px; letter-spacing: .05em; }
+  .cta p { font-size: 11px; color: var(--text-dim); margin-bottom: 14px; line-height: 1.7; }
+  .cta-btn {
+    display: inline-block; padding: 12px 28px;
+    background: var(--gold); color: #1a1a1a; text-decoration: none;
+    font-weight: 700; font-size: 12px; letter-spacing: .1em;
+    box-shadow: 0 0 20px rgba(212, 168, 87, .4);
+  }
+  .disclaimer {
+    margin-top: 18px; padding: 12px; font-size: 10px;
+    color: var(--text-dim); background: rgba(0,0,0,.3);
+    border-left: 2px solid var(--danger); line-height: 1.7;
+  }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-mark">N</div>
+    <div class="logo-text">
+      <h1>NEURAL MEMORY ATLAS</h1>
+      <div class="sub">PAIN MEMORY DIAGNOSTIC SYSTEM v1.0</div>
+    </div>
+  </div>
+  <div class="status"><span class="dot"></span>DATABASE: 45 PATTERNS LOADED</div>
+</div>
+
+<div class="main">
+
+  <!-- ===== LEFT: ANATOMY ===== -->
+  <div class="anatomy-panel">
+    <div class="anatomy-header">
+      <div class="anatomy-title">◆ HUMAN ANATOMY VIEWER</div>
+      <div class="view-toggle">
+        <button class="view-btn active" id="btnFront" onclick="switchView('front')">ANTERIOR</button>
+        <button class="view-btn" id="btnBack" onclick="switchView('back')">POSTERIOR</button>
+      </div>
+    </div>
+
+    <div class="hud-top-left" id="hudRegion">REGION: —</div>
+    <div class="hud-top-right">NERVES: <span id="hudNerveCount" style="color:var(--gold)">0</span>/24</div>
+
+    <div class="svg-wrap">
+      <!-- ========= FRONT VIEW ========= -->
+      <svg id="svgFront" viewBox="0 0 400 780" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="bodyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#0f1a30"/>
+            <stop offset="50%" stop-color="#0a1428"/>
+            <stop offset="100%" stop-color="#050810"/>
+          </linearGradient>
+          <filter id="glow"><feGaussianBlur stdDeviation="3"/></filter>
+        </defs>
+
+        <!-- Body silhouette (front) -->
+        <path class="body-outline" d="
+          M 200 30
+          C 225 30, 245 50, 245 80
+          C 245 100, 238 115, 228 122
+          L 228 138
+          C 228 145, 240 148, 252 152
+          L 280 162
+          C 305 170, 320 190, 325 215
+          L 340 285
+          C 344 305, 343 320, 338 330
+          C 335 335, 330 336, 326 330
+          L 310 280
+          L 305 290
+          L 310 350
+          C 312 380, 312 395, 305 410
+          L 298 430
+          L 295 450
+          C 295 465, 290 470, 285 465
+          L 278 440
+          L 275 420
+          C 273 408, 272 400, 270 390
+          L 260 330
+          L 255 340
+          L 258 420
+          C 259 445, 255 470, 250 490
+          L 240 560
+          C 238 590, 240 615, 245 640
+          L 255 720
+          C 257 735, 255 745, 245 748
+          L 225 748
+          C 218 748, 215 740, 215 730
+          L 212 660
+          C 210 635, 205 615, 200 595
+          C 195 615, 190 635, 188 660
+          L 185 730
+          C 185 740, 182 748, 175 748
+          L 155 748
+          C 145 745, 143 735, 145 720
+          L 155 640
+          C 160 615, 162 590, 160 560
+          L 150 490
+          C 145 470, 141 445, 142 420
+          L 145 340
+          L 140 330
+          L 130 390
+          C 128 400, 127 408, 125 420
+          L 122 440
+          L 115 465
+          C 110 470, 105 465, 105 450
+          L 102 430
+          L 95 410
+          C 88 395, 88 380, 90 350
+          L 95 290
+          L 90 280
+          L 74 330
+          C 70 336, 65 335, 62 330
+          C 57 320, 56 305, 60 285
+          L 75 215
+          C 80 190, 95 170, 120 162
+          L 148 152
+          C 160 148, 172 145, 172 138
+          L 172 122
+          C 162 115, 155 100, 155 80
+          C 155 50, 175 30, 200 30
+          Z"/>
+
+        <!-- NERVE PATHS (front) -->
+        <!-- Brachial plexus / median / ulnar (right arm from viewer perspective = patient left) -->
+        <path class="nerve-path" data-nerve="brachial" d="M 275 155 Q 300 180 315 220 Q 325 260 320 300 Q 318 340 310 370"/>
+        <path class="nerve-path" data-nerve="median" d="M 310 370 Q 312 405 305 440"/>
+        <path class="nerve-path" data-nerve="brachial-L" d="M 125 155 Q 100 180 85 220 Q 75 260 80 300 Q 82 340 90 370"/>
+        <path class="nerve-path" data-nerve="median-L" d="M 90 370 Q 88 405 95 440"/>
+        <!-- Femoral nerve (both legs) -->
+        <path class="nerve-path" data-nerve="femoral" d="M 175 310 Q 172 380 175 450 Q 178 510 180 560"/>
+        <path class="nerve-path" data-nerve="femoral-R" d="M 225 310 Q 228 380 225 450 Q 222 510 220 560"/>
+        <!-- Saphenous (continuation) -->
+        <path class="nerve-path" data-nerve="saphenous" d="M 180 560 Q 178 620 180 680"/>
+        <path class="nerve-path" data-nerve="saphenous-R" d="M 220 560 Q 222 620 220 680"/>
+
+        <!-- CLICKABLE REGIONS (front) -->
+        <rect class="region" data-region="head" data-label="HEAD/JAW" x="160" y="30" width="80" height="95" rx="6"/>
+        <rect class="region" data-region="neck" data-label="CERVICAL" x="170" y="125" width="60" height="28" rx="4"/>
+        <rect class="region" data-region="shoulder" data-label="SHOULDER" x="90" y="150" width="220" height="55" rx="6"/>
+        <rect class="region" data-region="arm" data-label="UPPER LIMB" x="65" y="205" width="50" height="170" rx="6"/>
+        <rect class="region" data-region="arm" data-label="UPPER LIMB" x="285" y="205" width="50" height="170" rx="6"/>
+        <rect class="region" data-region="forearm" data-label="FOREARM/WRIST" x="85" y="375" width="35" height="100" rx="6"/>
+        <rect class="region" data-region="forearm" data-label="FOREARM/WRIST" x="280" y="375" width="35" height="100" rx="6"/>
+        <rect class="region" data-region="trunk" data-label="TRUNK" x="140" y="210" width="120" height="110" rx="6"/>
+        <rect class="region" data-region="hip" data-label="HIP/GROIN" x="145" y="320" width="110" height="50" rx="6"/>
+        <rect class="region" data-region="thigh" data-label="THIGH/KNEE" x="150" y="370" width="45" height="210" rx="6"/>
+        <rect class="region" data-region="thigh" data-label="THIGH/KNEE" x="205" y="370" width="45" height="210" rx="6"/>
+        <rect class="region" data-region="leg" data-label="LEG/FOOT" x="150" y="580" width="45" height="165" rx="6"/>
+        <rect class="region" data-region="leg" data-label="LEG/FOOT" x="205" y="580" width="45" height="165" rx="6"/>
+      </svg>
+
+      <!-- ========= BACK VIEW ========= -->
+      <svg id="svgBack" viewBox="0 0 400 780" xmlns="http://www.w3.org/2000/svg" class="hidden">
+        <path class="body-outline" d="
+          M 200 30
+          C 225 30, 245 50, 245 80
+          C 245 100, 238 115, 228 122
+          L 228 138
+          C 228 145, 240 148, 252 152
+          L 280 162
+          C 305 170, 320 190, 325 215
+          L 340 285
+          C 344 305, 343 320, 338 330
+          C 335 335, 330 336, 326 330
+          L 310 280
+          L 305 290
+          L 310 350
+          C 312 380, 312 395, 305 410
+          L 298 430
+          L 295 450
+          C 295 465, 290 470, 285 465
+          L 278 440
+          L 275 420
+          C 273 408, 272 400, 270 390
+          L 260 330
+          L 255 340
+          L 258 420
+          C 259 445, 255 470, 250 490
+          L 240 560
+          C 238 590, 240 615, 245 640
+          L 255 720
+          C 257 735, 255 745, 245 748
+          L 225 748
+          C 218 748, 215 740, 215 730
+          L 212 660
+          C 210 635, 205 615, 200 595
+          C 195 615, 190 635, 188 660
+          L 185 730
+          C 185 740, 182 748, 175 748
+          L 155 748
+          C 145 745, 143 735, 145 720
+          L 155 640
+          C 160 615, 162 590, 160 560
+          L 150 490
+          C 145 470, 141 445, 142 420
+          L 145 340
+          L 140 330
+          L 130 390
+          C 128 400, 127 408, 125 420
+          L 122 440
+          L 115 465
+          C 110 470, 105 465, 105 450
+          L 102 430
+          L 95 410
+          C 88 395, 88 380, 90 350
+          L 95 290
+          L 90 280
+          L 74 330
+          C 70 336, 65 335, 62 330
+          C 57 320, 56 305, 60 285
+          L 75 215
+          C 80 190, 95 170, 120 162
+          L 148 152
+          C 160 148, 172 145, 172 138
+          L 172 122
+          C 162 115, 155 100, 155 80
+          C 155 50, 175 30, 200 30
+          Z"/>
+
+        <!-- Spine -->
+        <path class="nerve-path" data-nerve="spine" d="M 200 140 L 200 420" style="stroke: rgba(212,168,87,.5);stroke-width:2;"/>
+        <!-- Suboccipital -->
+        <path class="nerve-path" data-nerve="suboccipital" d="M 175 110 Q 200 125 225 110"/>
+        <!-- Radial -->
+        <path class="nerve-path" data-nerve="radial" d="M 270 170 Q 300 220 315 280 Q 320 330 310 380"/>
+        <path class="nerve-path" data-nerve="radial-L" d="M 130 170 Q 100 220 85 280 Q 80 330 90 380"/>
+        <!-- Ulnar -->
+        <path class="nerve-path" data-nerve="ulnar" d="M 275 160 Q 305 210 318 270 Q 325 320 315 370 Q 310 400 303 430"/>
+        <path class="nerve-path" data-nerve="ulnar-L" d="M 125 160 Q 95 210 82 270 Q 75 320 85 370 Q 90 400 97 430"/>
+        <!-- Sciatic (left & right) -->
+        <path class="nerve-path" data-nerve="sciatic" d="M 170 340 Q 165 400 168 470 Q 170 530 172 580 Q 175 640 178 700"/>
+        <path class="nerve-path" data-nerve="sciatic-R" d="M 230 340 Q 235 400 232 470 Q 230 530 228 580 Q 225 640 222 700"/>
+        <!-- Tibial -->
+        <path class="nerve-path" data-nerve="tibial" d="M 178 700 Q 180 730 180 745"/>
+        <path class="nerve-path" data-nerve="tibial-R" d="M 222 700 Q 220 730 220 745"/>
+
+        <!-- REGIONS (back) -->
+        <rect class="region" data-region="head" data-label="OCCIPUT" x="160" y="30" width="80" height="95" rx="6"/>
+        <rect class="region" data-region="neck" data-label="CERVICAL" x="170" y="125" width="60" height="28" rx="4"/>
+        <rect class="region" data-region="upperback" data-label="UPPER BACK" x="120" y="150" width="160" height="110" rx="6"/>
+        <rect class="region" data-region="lowerback" data-label="LUMBAR" x="140" y="260" width="120" height="90" rx="6"/>
+        <rect class="region" data-region="arm" data-label="UPPER LIMB" x="65" y="205" width="50" height="170" rx="6"/>
+        <rect class="region" data-region="arm" data-label="UPPER LIMB" x="285" y="205" width="50" height="170" rx="6"/>
+        <rect class="region" data-region="forearm" data-label="ELBOW/FOREARM" x="85" y="375" width="35" height="100" rx="6"/>
+        <rect class="region" data-region="forearm" data-label="ELBOW/FOREARM" x="280" y="375" width="35" height="100" rx="6"/>
+        <rect class="region" data-region="glute" data-label="GLUTE/SI" x="145" y="350" width="110" height="60" rx="6"/>
+        <rect class="region" data-region="thigh" data-label="POST. THIGH" x="150" y="410" width="45" height="170" rx="6"/>
+        <rect class="region" data-region="thigh" data-label="POST. THIGH" x="205" y="410" width="45" height="170" rx="6"/>
+        <rect class="region" data-region="leg" data-label="CALF/ACHILLES" x="150" y="580" width="45" height="165" rx="6"/>
+        <rect class="region" data-region="leg" data-label="CALF/ACHILLES" x="205" y="580" width="45" height="165" rx="6"/>
+      </svg>
+    </div>
+
+    <div class="hud-bottom">SYS.NEURAL / <span class="val" id="hudStatus">READY</span></div>
+  </div>
+
+  <!-- ===== RIGHT: INFO PANEL ===== -->
+  <div class="info-panel">
+    <!-- STEP 1 -->
+    <div id="step1">
+      <div class="step-label">◆ STEP 01 / 03</div>
+      <div class="step-title">患者様の痛みが出る部位を選択</div>
+      <div class="help-text">
+        左の人体図で、患者様が痛みを訴える部位をクリックしてください。該当部位の動作パターンが一覧表示されます。<br>
+        前面 / 背面は右上のタブで切り替え可能です。
+      </div>
+      <div id="actionListWrap">
+        <div class="empty-hint">◀ 左の人体図から部位を選択してください</div>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div id="step2" class="hidden">
+      <div class="step-label">◆ STEP 02 / 03</div>
+      <div class="step-title" id="step2Title"></div>
+      <div class="help-text">以下の問診項目に回答してください。回答内容から神経因子の確率が調整されます。</div>
+      <div id="questionContainer"></div>
+      <div class="nav-buttons">
+        <button class="btn btn-secondary" onclick="goToStep1()">← 戻る</button>
+        <button class="btn btn-primary" id="analyzeBtn" onclick="analyze()" disabled>◆ 痛みの記憶を特定する</button>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div id="step3" class="hidden">
+      <div class="step-label">◆ DIAGNOSTIC OUTPUT</div>
+      <div class="step-title">神経因子 特定結果</div>
+      <div id="resultContainer"></div>
+      <div class="nav-buttons" style="margin-top: 20px;">
+        <button class="btn btn-secondary" onclick="goToStep1()">← 最初からやり直す</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="data/pain_memory_db.js"></script>
+<script>
+let DB = null;
+let currentAction = null;
+let currentAnswers = {};
+let currentView = 'front';
+let currentRegion = null;
+
+// Region → category mapping
+const REGION_CATEGORIES = {
+  head: ['head_jaw'],
+  neck: ['spine_cervical'],
+  shoulder: ['upper_limb'],
+  arm: ['upper_limb'],
+  forearm: ['upper_limb'],
+  trunk: ['trunk_complex', 'rest_autonomic'],
+  upperback: ['spine_cervical', 'trunk_complex'],
+  lowerback: ['spine_lumbar', 'trunk_complex'],
+  hip: ['lower_limb'],
+  glute: ['spine_lumbar', 'lower_limb'],
+  thigh: ['lower_limb'],
+  leg: ['lower_limb']
+};
+
+// Nerve keyword → SVG path data-nerve mapping for highlight
+const NERVE_HIGHLIGHT_MAP = {
+  '坐骨': ['sciatic', 'sciatic-R'],
+  '正中': ['median', 'median-L'],
+  '尺骨': ['ulnar', 'ulnar-L'],
+  '橈骨': ['radial', 'radial-L'],
+  '大腿神経': ['femoral', 'femoral-R'],
+  '脛骨': ['tibial', 'tibial-R', 'sciatic', 'sciatic-R'],
+  '腓骨': ['sciatic', 'sciatic-R'],
+  '腕神経叢': ['brachial', 'brachial-L'],
+  '腋窩': ['brachial', 'brachial-L'],
+  '筋皮': ['brachial', 'brachial-L'],
+  '肩甲上': ['brachial', 'brachial-L'],
+  '大後頭': ['suboccipital'],
+  '後頭': ['suboccipital'],
+  '副神経': ['suboccipital'],
+  '硬膜': ['spine'],
+  '神経根': ['spine'],
+  '椎間関節': ['spine'],
+  '馬尾': ['spine', 'sciatic', 'sciatic-R'],
+  '伏在': ['saphenous', 'saphenous-R', 'femoral', 'femoral-R'],
+  '閉鎖': ['femoral', 'femoral-R'],
+  '三叉': ['suboccipital']
+};
+
+function loadDB() {
+  DB = window.PAIN_DB;
+  bindRegions();
+}
+
+function bindRegions() {
+  document.querySelectorAll('.region').forEach(r => {
+    r.addEventListener('click', () => selectRegion(r.dataset.region, r.dataset.label));
+    r.addEventListener('mouseenter', () => {
+      document.getElementById('hudRegion').textContent = 'REGION: ' + r.dataset.label;
+    });
+  });
+}
+
+function switchView(view) {
+  currentView = view;
+  document.getElementById('svgFront').classList.toggle('hidden', view !== 'front');
+  document.getElementById('svgBack').classList.toggle('hidden', view !== 'back');
+  document.getElementById('btnFront').classList.toggle('active', view === 'front');
+  document.getElementById('btnBack').classList.toggle('active', view === 'back');
+  bindRegions();
+}
+
+function selectRegion(region, label) {
+  currentRegion = region;
+  document.querySelectorAll('.region.active').forEach(r => r.classList.remove('active'));
+  document.querySelectorAll(`[data-region="${region}"]`).forEach(r => r.classList.add('active'));
+  document.getElementById('hudStatus').textContent = 'REGION LOCKED';
+
+  const categories = REGION_CATEGORIES[region] || [];
+  const actions = DB.actions.filter(a => categories.includes(a.category));
+  renderActionList(actions, label);
+}
+
+function renderActionList(actions, regionLabel) {
+  const wrap = document.getElementById('actionListWrap');
+  if (!actions.length) {
+    wrap.innerHTML = '<div class="empty-hint">該当する動作パターンがありません</div>';
+    return;
+  }
+  wrap.innerHTML = `
+    <div style="font-size:10px;color:var(--text-dim);margin-bottom:10px;letter-spacing:.1em;">
+      ◆ ${regionLabel} ｜ ${actions.length} PATTERNS
+    </div>
+    <div class="action-list">
+      ${actions.map(a => `
+        <div class="action-item" onclick="selectAction('${a.id}')">
+          <span class="id">${a.id}</span>${a.main_action}
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function selectAction(id) {
+  currentAction = DB.actions.find(a => a.id === id);
+  currentAnswers = {};
+  document.getElementById('step1').classList.add('hidden');
+  document.getElementById('step2').classList.remove('hidden');
+  document.getElementById('step2Title').textContent = currentAction.main_action;
+  document.getElementById('hudStatus').textContent = 'SCANNING...';
+  renderQuestions();
+}
+
+function renderQuestions() {
+  const container = document.getElementById('questionContainer');
+  container.innerHTML = currentAction.sub_questions.map((q, i) => `
+    <div class="question-box">
+      <div class="q-num">QUESTION ${String(i + 1).padStart(2, '0')}</div>
+      <div class="q-text">${q.text}</div>
+      <div class="q-options">
+        ${q.options.map(opt =>
+          `<button class="opt-btn" onclick="selectOption('${q.id}', ${JSON.stringify(opt).replace(/"/g, '&quot;')}, this)">${opt}</button>`
+        ).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectOption(qid, value, btn) {
+  currentAnswers[qid] = value;
+  btn.parentElement.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  const allAnswered = currentAction.sub_questions.every(q => currentAnswers[q.id]);
+  document.getElementById('analyzeBtn').disabled = !allAnswered;
+}
+
+function analyze() {
+  const candidates = currentAction.neural_candidates.map(c => ({...c}));
+  const answerValues = Object.values(currentAnswers).join(' ');
+
+  candidates.forEach(c => {
+    const keywords = (c.condition || '').split(/[、・＋+／\/\s]+/).filter(k => k.length >= 2);
+    let boost = 0;
+    keywords.forEach(kw => {
+      if (answerValues.includes(kw)) boost += 8;
+    });
+    if (answerValues.includes('はい') && (c.condition || '').includes('陽性')) boost += 5;
+    c.adjusted = Math.min(95, Math.max(5, c.probability + boost));
+  });
+
+  candidates.sort((a, b) => b.adjusted - a.adjusted);
+  renderResult(candidates);
+  highlightNerves(candidates[0].nerve);
+
+  document.getElementById('step2').classList.add('hidden');
+  document.getElementById('step3').classList.remove('hidden');
+  document.getElementById('hudStatus').textContent = 'NEURAL MEMORY FOUND';
+}
+
+function highlightNerves(nerveName) {
+  document.querySelectorAll('.nerve-path.highlight').forEach(p => p.classList.remove('highlight'));
+  let matchedIds = [];
+  for (const [keyword, ids] of Object.entries(NERVE_HIGHLIGHT_MAP)) {
+    if (nerveName.includes(keyword)) {
+      matchedIds = matchedIds.concat(ids);
+    }
+  }
+  matchedIds.forEach(id => {
+    document.querySelectorAll(`[data-nerve="${id}"]`).forEach(p => p.classList.add('highlight'));
+  });
+  document.getElementById('hudNerveCount').textContent = matchedIds.length;
+}
+
+function renderResult(candidates) {
+  const a = currentAction;
+  document.getElementById('resultContainer').innerHTML = `
+    <div class="result-top">
+      <div class="label">INPUT ACTION</div>
+      <div class="action-name">${a.main_action}</div>
+    </div>
+
+    <div class="section-label">▼ NEURAL CANDIDATES (TOP 3)</div>
+    ${candidates.map((c, i) => `
+      <div class="nerve-card ${i === 0 ? 'r1' : ''}">
+        <div class="nerve-rank">RANK 0${i + 1}</div>
+        <div class="nerve-name">${c.nerve}</div>
+        <div class="nerve-prob-wrap">
+          <div class="prob-bar"><div class="prob-fill" style="width:${c.adjusted}%"></div></div>
+          <div class="prob-val">${c.adjusted}%</div>
+        </div>
+        <div class="nerve-cond">▸ ${c.condition}</div>
+      </div>
+    `).join('')}
+
+    <div class="section-label">▼ NEURAL MECHANISM</div>
+    <div class="detail-card">${a.mechanism}</div>
+
+    <div class="section-label">▼ LOCKED REGIONS</div>
+    <div class="detail-card">
+      <div class="locked-list">
+        ${a.locked_regions.map(r => `<span class="locked-tag">${r}</span>`).join('')}
+      </div>
+    </div>
+
+    <div class="section-label">▼ CLINICAL ADVICE</div>
+    <div class="advice-card">${a.therapist_advice}</div>
+
+    <div class="cta">
+      <h3>この神経を確実にリリースする手技は？</h3>
+      <p>45パターンすべてに対応した末梢神経リリース手技を<br>動画で体系化。明日の臨床から即実践可能。</p>
+      <a href="#" class="cta-btn" onclick="alert('※教材LPに差し替えてください');return false;">MANUAL を見る →</a>
+    </div>
+
+    <div class="disclaimer">
+      ※本システムは治療家の臨床推論を補助する参考情報であり医学的診断を代替するものではありません。レッドフラッグ症状（進行性の筋力低下、膀胱直腸障害、夜間持続痛、発熱、体重減少等）を認めた場合は速やかに医療機関への紹介を行ってください。
+    </div>
+  `;
+}
+
+function goToStep1() {
+  currentAction = null;
+  currentAnswers = {};
+  currentRegion = null;
+  document.querySelectorAll('.region.active').forEach(r => r.classList.remove('active'));
+  document.querySelectorAll('.nerve-path.highlight').forEach(p => p.classList.remove('highlight'));
+  document.getElementById('actionListWrap').innerHTML = '<div class="empty-hint">◀ 左の人体図から部位を選択してください</div>';
+  document.getElementById('hudStatus').textContent = 'READY';
+  document.getElementById('hudNerveCount').textContent = '0';
+  document.getElementById('hudRegion').textContent = 'REGION: —';
+  document.getElementById('step2').classList.add('hidden');
+  document.getElementById('step3').classList.add('hidden');
+  document.getElementById('step1').classList.remove('hidden');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+loadDB();
+</script>
+
+</body>
+</html>
