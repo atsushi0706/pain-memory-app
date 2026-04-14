@@ -334,6 +334,72 @@
     border-left: 2px solid var(--danger); line-height: 1.7;
   }
   .hidden { display: none !important; }
+
+  /* ===== Video Chapter Style ===== */
+  .chapter-intro {
+    margin: 24px 0 14px;
+    padding: 14px 18px;
+    background: linear-gradient(90deg, rgba(212,168,87,.12), transparent);
+    border-left: 3px solid var(--gold);
+  }
+  .chapter-intro .label { font-size: 10px; letter-spacing: .2em; color: var(--gold); }
+  .chapter-intro .title { font-size: 14px; color: var(--text); margin-top: 4px; }
+
+  .chapter-card {
+    margin-bottom: 14px;
+    background: rgba(79, 195, 247, .04);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    transition: all .25s;
+  }
+  .chapter-card:hover {
+    border-color: rgba(212, 168, 87, .4);
+    box-shadow: 0 0 16px rgba(212, 168, 87, .08);
+  }
+  .chapter-head {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 18px;
+    background: rgba(0, 0, 0, .25);
+    border-bottom: 1px solid var(--border);
+  }
+  .chapter-num {
+    width: 34px; height: 34px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--gold); color: #0a0f1c;
+    font-weight: 700; font-size: 13px;
+    border-radius: 50%;
+    box-shadow: 0 0 12px rgba(212, 168, 87, .4);
+    flex-shrink: 0;
+  }
+  .chapter-meta { flex: 1; }
+  .chapter-kicker {
+    font-size: 9px; letter-spacing: .2em; color: var(--gold);
+  }
+  .chapter-title {
+    font-size: 14px; color: var(--text); margin-top: 2px;
+  }
+  .chapter-icon {
+    font-size: 18px; color: var(--gold-glow); opacity: .6;
+  }
+  .chapter-body {
+    padding: 16px 18px 18px 66px;
+    font-size: 13px; color: var(--text);
+    line-height: 1.95;
+  }
+
+  .expert-toggle {
+    margin-top: 20px; padding: 12px 16px;
+    background: transparent;
+    border: 1px dashed var(--border);
+    color: var(--text-dim);
+    font-family: inherit; font-size: 11px;
+    letter-spacing: .1em; cursor: pointer;
+    width: 100%; text-align: left;
+    transition: all .2s;
+  }
+  .expert-toggle:hover { border-color: var(--gold); color: var(--gold); }
+  .expert-section { margin-top: 12px; }
 </style>
 </head>
 <body>
@@ -791,13 +857,14 @@ function highlightNerves(nerveName) {
 
 function renderResult(candidates) {
   const a = currentAction;
+  const p = a.plain || {};
   document.getElementById('resultContainer').innerHTML = `
     <div class="result-top">
       <div class="label">INPUT ACTION</div>
       <div class="action-name">${a.main_action}</div>
     </div>
 
-    <div class="section-label">▼ NEURAL CANDIDATES (TOP 3)</div>
+    <div class="section-label">▼ 原因神経の候補（TOP 3）</div>
     ${candidates.map((c, i) => `
       <div class="nerve-card ${i === 0 ? 'r1' : ''}">
         <div class="nerve-rank">RANK 0${i + 1}</div>
@@ -810,22 +877,77 @@ function renderResult(candidates) {
       </div>
     `).join('')}
 
-    <div class="section-label">▼ NEURAL MECHANISM</div>
-    <div class="detail-card">${a.mechanism}</div>
+    <div class="chapter-intro">
+      <div class="label">◆ LEARNING CHAPTERS</div>
+      <div class="title">動画マニュアルを見る前に、4つのチャプターで理解を深めましょう</div>
+    </div>
 
-    <div class="section-label">▼ LOCKED REGIONS</div>
+    <div class="chapter-card">
+      <div class="chapter-head">
+        <div class="chapter-num">1</div>
+        <div class="chapter-meta">
+          <div class="chapter-kicker">CHAPTER 01</div>
+          <div class="chapter-title">この症状はひと言でいうと？</div>
+        </div>
+        <div class="chapter-icon">▶</div>
+      </div>
+      <div class="chapter-body">${p.what || '（解説準備中）'}</div>
+    </div>
+
+    <div class="chapter-card">
+      <div class="chapter-head">
+        <div class="chapter-num">2</div>
+        <div class="chapter-meta">
+          <div class="chapter-kicker">CHAPTER 02</div>
+          <div class="chapter-title">なぜこの神経が痛みを記憶するのか？</div>
+        </div>
+        <div class="chapter-icon">▶</div>
+      </div>
+      <div class="chapter-body">${p.why || a.mechanism}</div>
+    </div>
+
+    <div class="chapter-card">
+      <div class="chapter-head">
+        <div class="chapter-num">3</div>
+        <div class="chapter-meta">
+          <div class="chapter-kicker">CHAPTER 03</div>
+          <div class="chapter-title">現場での見分け方・チェック方法</div>
+        </div>
+        <div class="chapter-icon">▶</div>
+      </div>
+      <div class="chapter-body">${p.check || '問診項目を参考にしてください'}</div>
+    </div>
+
+    <div class="chapter-card">
+      <div class="chapter-head">
+        <div class="chapter-num">4</div>
+        <div class="chapter-meta">
+          <div class="chapter-kicker">CHAPTER 04</div>
+          <div class="chapter-title">動画マニュアルで学ぶべきポイント</div>
+        </div>
+        <div class="chapter-icon">▶</div>
+      </div>
+      <div class="chapter-body">${p.approach || a.therapist_advice}</div>
+    </div>
+
+    <div class="section-label">▼ 代償的にロックされやすい部位</div>
     <div class="detail-card">
       <div class="locked-list">
         ${a.locked_regions.map(r => `<span class="locked-tag">${r}</span>`).join('')}
       </div>
     </div>
 
-    <div class="section-label">▼ CLINICAL ADVICE</div>
-    <div class="advice-card">${a.therapist_advice}</div>
+    <button class="expert-toggle" onclick="toggleExpert(this)">▸ 専門情報（解剖学的機序・臨床助言）を表示</button>
+    <div class="expert-section hidden">
+      <div class="section-label">▼ 神経学的メカニズム（専門）</div>
+      <div class="detail-card">${a.mechanism}</div>
+      <div class="section-label">▼ 臨床助言（専門）</div>
+      <div class="advice-card">${a.therapist_advice}</div>
+    </div>
 
     <div class="cta">
       <h3>この神経を確実にリリースする手技は？</h3>
-      <p>45パターンすべてに対応した末梢神経リリース手技を<br>動画で体系化。明日の臨床から即実践可能。</p>
+      <p>44パターンすべてに対応した末梢神経リリース手技を<br>動画で体系化。明日の臨床から即実践可能。</p>
       <a href="#" class="cta-btn" onclick="alert('※教材LPに差し替えてください');return false;">MANUAL を見る →</a>
     </div>
 
@@ -833,6 +955,12 @@ function renderResult(candidates) {
       ※本システムは治療家の臨床推論を補助する参考情報であり医学的診断を代替するものではありません。レッドフラッグ症状（進行性の筋力低下、膀胱直腸障害、夜間持続痛、発熱、体重減少等）を認めた場合は速やかに医療機関への紹介を行ってください。
     </div>
   `;
+}
+
+function toggleExpert(btn) {
+  const sec = btn.nextElementSibling;
+  const isHidden = sec.classList.toggle('hidden');
+  btn.textContent = isHidden ? '▸ 専門情報（解剖学的機序・臨床助言）を表示' : '▾ 専門情報を隠す';
 }
 
 function goToStep1() {
