@@ -528,49 +528,54 @@
 
     <div class="svg-wrap">
       <!-- ========= FRONT VIEW ========= -->
-      <!-- viewBox uses real image aspect (225 x 360 approx → scaled) -->
-      <svg id="svgFront" viewBox="0 0 225 360" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
-        <image href="assets/body_front.png" x="0" y="0" width="225" height="360" preserveAspectRatio="xMidYMid meet"/>
-        <!-- Clickable regions tuned to body_front.png proportions -->
-        <rect class="region" data-region="head" data-label="HEAD / JAW" x="92" y="5" width="42" height="48" rx="4"/>
-        <rect class="region" data-region="neck" data-label="NECK / CERVICAL" x="98" y="53" width="30" height="14" rx="3"/>
-        <rect class="region" data-region="shoulder" data-label="SHOULDER" x="68" y="67" width="92" height="28" rx="4"/>
-        <rect class="region" data-region="arm" data-label="UPPER ARM" x="47" y="95" width="24" height="62" rx="4"/>
-        <rect class="region" data-region="arm" data-label="UPPER ARM" x="156" y="95" width="24" height="62" rx="4"/>
-        <rect class="region" data-region="forearm" data-label="FOREARM / WRIST" x="42" y="157" width="24" height="58" rx="4"/>
-        <rect class="region" data-region="forearm" data-label="FOREARM / WRIST" x="160" y="157" width="24" height="58" rx="4"/>
-        <rect class="region" data-region="trunk" data-label="TRUNK / ABDOMEN" x="80" y="95" width="66" height="72" rx="4"/>
-        <rect class="region" data-region="hip" data-label="HIP / GROIN" x="82" y="167" width="62" height="26" rx="4"/>
-        <rect class="region" data-region="thigh" data-label="THIGH (FRONT)" x="80" y="193" width="31" height="70" rx="4"/>
-        <rect class="region" data-region="thigh" data-label="THIGH (FRONT)" x="115" y="193" width="31" height="70" rx="4"/>
-        <rect class="region" data-region="knee" data-label="KNEE" x="82" y="263" width="28" height="18" rx="4"/>
-        <rect class="region" data-region="knee" data-label="KNEE" x="116" y="263" width="28" height="18" rx="4"/>
-        <rect class="region" data-region="leg" data-label="SHIN / CALF" x="82" y="281" width="28" height="55" rx="4"/>
-        <rect class="region" data-region="leg" data-label="SHIN / CALF" x="116" y="281" width="28" height="55" rx="4"/>
-        <rect class="region" data-region="foot" data-label="FOOT / ANKLE" x="78" y="336" width="34" height="22" rx="4"/>
-        <rect class="region" data-region="foot" data-label="FOOT / ANKLE" x="114" y="336" width="34" height="22" rx="4"/>
+      <!-- viewBox matches native image size 1440x3040 -->
+      <svg id="svgFront" viewBox="0 0 1440 3040" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+        <image href="assets/body_front.png" x="0" y="0" width="1440" height="3040"/>
+        <!-- Regions to be tuned via Playwright testing -->
+        <rect class="region" data-region="head" data-label="HEAD / JAW" x="600" y="80" width="240" height="300" rx="20"/>
+        <rect class="region" data-region="neck" data-label="NECK / CERVICAL" x="640" y="380" width="160" height="80" rx="15"/>
+        <rect class="region" data-region="shoulder" data-label="SHOULDERS" x="440" y="460" width="560" height="120" rx="20"/>
+        <rect class="region" data-region="trunk" data-label="CHEST / TRUNK" x="500" y="580" width="440" height="420" rx="20"/>
+        <rect class="region" data-region="trunk" data-label="ABDOMEN" x="520" y="1000" width="400" height="300" rx="20"/>
+        <rect class="region" data-region="hip" data-label="HIP / GROIN" x="520" y="1300" width="400" height="200" rx="20"/>
+        <rect class="region" data-region="arm" data-label="UPPER ARM" x="300" y="560" width="170" height="520" rx="20"/>
+        <rect class="region" data-region="arm" data-label="UPPER ARM" x="970" y="560" width="170" height="520" rx="20"/>
+        <rect class="region" data-region="forearm" data-label="FOREARM" x="240" y="1080" width="180" height="460" rx="20"/>
+        <rect class="region" data-region="forearm" data-label="FOREARM" x="1020" y="1080" width="180" height="460" rx="20"/>
+        <rect class="region" data-region="forearm" data-label="WRIST / HAND" x="180" y="1540" width="220" height="220" rx="20"/>
+        <rect class="region" data-region="forearm" data-label="WRIST / HAND" x="1040" y="1540" width="220" height="220" rx="20"/>
+        <rect class="region" data-region="thigh" data-label="THIGH (FRONT)" x="540" y="1500" width="180" height="680" rx="20"/>
+        <rect class="region" data-region="thigh" data-label="THIGH (FRONT)" x="720" y="1500" width="180" height="680" rx="20"/>
+        <rect class="region" data-region="knee" data-label="KNEE" x="540" y="2180" width="180" height="160" rx="20"/>
+        <rect class="region" data-region="knee" data-label="KNEE" x="720" y="2180" width="180" height="160" rx="20"/>
+        <rect class="region" data-region="leg" data-label="SHIN / CALF" x="540" y="2340" width="180" height="500" rx="20"/>
+        <rect class="region" data-region="leg" data-label="SHIN / CALF" x="720" y="2340" width="180" height="500" rx="20"/>
+        <rect class="region" data-region="foot" data-label="FOOT / ANKLE" x="510" y="2840" width="220" height="180" rx="20"/>
+        <rect class="region" data-region="foot" data-label="FOOT / ANKLE" x="710" y="2840" width="220" height="180" rx="20"/>
       </svg>
 
       <!-- ========= BACK VIEW ========= -->
-      <svg id="svgBack" viewBox="0 0 225 360" xmlns="http://www.w3.org/2000/svg" class="hidden" preserveAspectRatio="xMidYMid meet">
-        <image href="assets/body_back.png" x="0" y="0" width="225" height="360" preserveAspectRatio="xMidYMid meet"/>
-        <rect class="region" data-region="head" data-label="OCCIPUT" x="92" y="5" width="42" height="48" rx="4"/>
-        <rect class="region" data-region="neck" data-label="NECK / CERVICAL" x="98" y="53" width="30" height="14" rx="3"/>
-        <rect class="region" data-region="upperback" data-label="UPPER BACK" x="75" y="67" width="78" height="58" rx="4"/>
-        <rect class="region" data-region="lowerback" data-label="LOWER BACK / LUMBAR" x="80" y="125" width="68" height="42" rx="4"/>
-        <rect class="region" data-region="arm" data-label="UPPER ARM" x="47" y="95" width="24" height="62" rx="4"/>
-        <rect class="region" data-region="arm" data-label="UPPER ARM" x="156" y="95" width="24" height="62" rx="4"/>
-        <rect class="region" data-region="forearm" data-label="ELBOW / FOREARM" x="42" y="157" width="24" height="58" rx="4"/>
-        <rect class="region" data-region="forearm" data-label="ELBOW / FOREARM" x="160" y="157" width="24" height="58" rx="4"/>
-        <rect class="region" data-region="glute" data-label="GLUTE / SI JOINT" x="78" y="167" width="70" height="35" rx="4"/>
-        <rect class="region" data-region="thigh" data-label="POSTERIOR THIGH" x="78" y="202" width="32" height="62" rx="4"/>
-        <rect class="region" data-region="thigh" data-label="POSTERIOR THIGH" x="115" y="202" width="32" height="62" rx="4"/>
-        <rect class="region" data-region="knee" data-label="KNEE (POPLITEAL)" x="80" y="264" width="30" height="16" rx="4"/>
-        <rect class="region" data-region="knee" data-label="KNEE (POPLITEAL)" x="116" y="264" width="30" height="16" rx="4"/>
-        <rect class="region" data-region="leg" data-label="CALF / ACHILLES" x="82" y="280" width="28" height="56" rx="4"/>
-        <rect class="region" data-region="leg" data-label="CALF / ACHILLES" x="116" y="280" width="28" height="56" rx="4"/>
-        <rect class="region" data-region="foot" data-label="HEEL / ANKLE" x="78" y="336" width="34" height="22" rx="4"/>
-        <rect class="region" data-region="foot" data-label="HEEL / ANKLE" x="114" y="336" width="34" height="22" rx="4"/>
+      <svg id="svgBack" viewBox="0 0 1440 3040" xmlns="http://www.w3.org/2000/svg" class="hidden" preserveAspectRatio="xMidYMid meet">
+        <image href="assets/body_back.png" x="0" y="0" width="1440" height="3040"/>
+        <rect class="region" data-region="head" data-label="OCCIPUT" x="600" y="80" width="240" height="300" rx="20"/>
+        <rect class="region" data-region="neck" data-label="NECK / CERVICAL" x="640" y="380" width="160" height="80" rx="15"/>
+        <rect class="region" data-region="upperback" data-label="UPPER BACK" x="480" y="460" width="480" height="460" rx="20"/>
+        <rect class="region" data-region="lowerback" data-label="LOWER BACK / LUMBAR" x="520" y="920" width="400" height="340" rx="20"/>
+        <rect class="region" data-region="arm" data-label="UPPER ARM" x="300" y="560" width="170" height="520" rx="20"/>
+        <rect class="region" data-region="arm" data-label="UPPER ARM" x="970" y="560" width="170" height="520" rx="20"/>
+        <rect class="region" data-region="forearm" data-label="ELBOW / FOREARM" x="240" y="1080" width="180" height="460" rx="20"/>
+        <rect class="region" data-region="forearm" data-label="ELBOW / FOREARM" x="1020" y="1080" width="180" height="460" rx="20"/>
+        <rect class="region" data-region="forearm" data-label="WRIST / HAND" x="180" y="1540" width="220" height="220" rx="20"/>
+        <rect class="region" data-region="forearm" data-label="WRIST / HAND" x="1040" y="1540" width="220" height="220" rx="20"/>
+        <rect class="region" data-region="glute" data-label="GLUTE / SI JOINT" x="500" y="1260" width="440" height="280" rx="20"/>
+        <rect class="region" data-region="thigh" data-label="POSTERIOR THIGH" x="540" y="1540" width="180" height="640" rx="20"/>
+        <rect class="region" data-region="thigh" data-label="POSTERIOR THIGH" x="720" y="1540" width="180" height="640" rx="20"/>
+        <rect class="region" data-region="knee" data-label="KNEE (POPLITEAL)" x="540" y="2180" width="180" height="160" rx="20"/>
+        <rect class="region" data-region="knee" data-label="KNEE (POPLITEAL)" x="720" y="2180" width="180" height="160" rx="20"/>
+        <rect class="region" data-region="leg" data-label="CALF / ACHILLES" x="540" y="2340" width="180" height="500" rx="20"/>
+        <rect class="region" data-region="leg" data-label="CALF / ACHILLES" x="720" y="2340" width="180" height="500" rx="20"/>
+        <rect class="region" data-region="foot" data-label="HEEL / ANKLE" x="510" y="2840" width="220" height="180" rx="20"/>
+        <rect class="region" data-region="foot" data-label="HEEL / ANKLE" x="710" y="2840" width="220" height="180" rx="20"/>
       </svg>
     </div>
 
