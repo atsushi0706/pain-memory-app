@@ -625,7 +625,7 @@
   </div>
 </div>
 
-<script src="data/pain_memory_db.js"></script>
+<script src="data/pain_memory_db.js?v=2"></script>
 <script>
 let DB = null;
 let currentAction = null;
@@ -633,23 +633,7 @@ let currentAnswers = {};
 let currentView = 'front';
 let currentRegion = null;
 
-// Region → category mapping
-const REGION_CATEGORIES = {
-  head: ['head_jaw'],
-  neck: ['spine_cervical'],
-  shoulder: ['upper_limb'],
-  arm: ['upper_limb'],
-  forearm: ['upper_limb'],
-  trunk: ['trunk_complex', 'rest_autonomic'],
-  upperback: ['spine_cervical', 'trunk_complex'],
-  lowerback: ['spine_lumbar', 'trunk_complex'],
-  hip: ['lower_limb'],
-  glute: ['spine_lumbar', 'lower_limb'],
-  thigh: ['lower_limb'],
-  knee: ['lower_limb'],
-  leg: ['lower_limb'],
-  foot: ['lower_limb']
-};
+// Regions tagged per-action in DB (a.regions). Filter by intersection.
 
 function scrollToInfoPanel() {
   if (window.innerWidth <= 900) {
@@ -689,8 +673,7 @@ function selectRegion(region, label) {
   document.getElementById('hudStatus').textContent = 'REGION LOCKED';
   document.getElementById('hudRegion').textContent = 'REGION: ' + label;
 
-  const categories = REGION_CATEGORIES[region] || [];
-  const actions = DB.actions.filter(a => categories.includes(a.category));
+  const actions = DB.actions.filter(a => Array.isArray(a.regions) && a.regions.includes(region));
   renderActionList(actions, label);
   scrollToInfoPanel();
 }
