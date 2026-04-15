@@ -61,7 +61,19 @@
     margin: 0 auto;
   }
   @media (max-width: 900px) {
-    .main { grid-template-columns: 1fr; }
+    .main { grid-template-columns: 1fr; padding: 16px; gap: 16px; }
+    .anatomy-panel { min-height: auto; padding: 14px; }
+    .svg-wrap svg { max-height: 480px; }
+    .info-panel { min-height: auto; padding: 20px; }
+    .chapter-body { padding-left: 18px !important; }
+    .header { padding: 14px 18px; }
+    .logo-text h1 { font-size: 13px; }
+    .status { display: none; }
+    .hud-top-right, .hud-top-left, .hud-bottom { display: none; }
+    .desktop-only { display: none !important; }
+  }
+  @media (min-width: 901px) {
+    .mobile-only { display: none !important; }
   }
 
   /* ===== Anatomy Panel ===== */
@@ -516,84 +528,49 @@
 
     <div class="svg-wrap">
       <!-- ========= FRONT VIEW ========= -->
-      <svg id="svgFront" viewBox="0 0 400 780" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="bodyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#0f1a30"/>
-            <stop offset="50%" stop-color="#0a1428"/>
-            <stop offset="100%" stop-color="#050810"/>
-          </linearGradient>
-          <filter id="glow"><feGaussianBlur stdDeviation="3"/></filter>
-        </defs>
-
-        <!-- Anatomical body image -->
-        <image href="assets/body.png" x="40" y="10" width="320" height="760" preserveAspectRatio="xMidYMid meet"/>
-
-        <!-- NERVE PATHS (front) -->
-        <!-- Brachial plexus / median / ulnar (right arm from viewer perspective = patient left) -->
-        <path class="nerve-path" data-nerve="brachial" d="M 275 155 Q 300 180 315 220 Q 325 260 320 300 Q 318 340 310 370"/>
-        <path class="nerve-path" data-nerve="median" d="M 310 370 Q 312 405 305 440"/>
-        <path class="nerve-path" data-nerve="brachial-L" d="M 125 155 Q 100 180 85 220 Q 75 260 80 300 Q 82 340 90 370"/>
-        <path class="nerve-path" data-nerve="median-L" d="M 90 370 Q 88 405 95 440"/>
-        <!-- Femoral nerve (both legs) -->
-        <path class="nerve-path" data-nerve="femoral" d="M 175 310 Q 172 380 175 450 Q 178 510 180 560"/>
-        <path class="nerve-path" data-nerve="femoral-R" d="M 225 310 Q 228 380 225 450 Q 222 510 220 560"/>
-        <!-- Saphenous (continuation) -->
-        <path class="nerve-path" data-nerve="saphenous" d="M 180 560 Q 178 620 180 680"/>
-        <path class="nerve-path" data-nerve="saphenous-R" d="M 220 560 Q 222 620 220 680"/>
-
-        <!-- CLICKABLE REGIONS (front) -->
-        <rect class="region" data-region="head" data-label="HEAD/JAW" x="160" y="30" width="80" height="95" rx="6"/>
-        <rect class="region" data-region="neck" data-label="CERVICAL" x="170" y="125" width="60" height="28" rx="4"/>
-        <rect class="region" data-region="shoulder" data-label="SHOULDER" x="90" y="150" width="220" height="55" rx="6"/>
-        <rect class="region" data-region="arm" data-label="UPPER LIMB" x="65" y="205" width="50" height="170" rx="6"/>
-        <rect class="region" data-region="arm" data-label="UPPER LIMB" x="285" y="205" width="50" height="170" rx="6"/>
-        <rect class="region" data-region="forearm" data-label="FOREARM/WRIST" x="85" y="375" width="35" height="100" rx="6"/>
-        <rect class="region" data-region="forearm" data-label="FOREARM/WRIST" x="280" y="375" width="35" height="100" rx="6"/>
-        <rect class="region" data-region="trunk" data-label="TRUNK" x="140" y="210" width="120" height="110" rx="6"/>
-        <rect class="region" data-region="hip" data-label="HIP/GROIN" x="145" y="320" width="110" height="50" rx="6"/>
-        <rect class="region" data-region="thigh" data-label="THIGH/KNEE" x="150" y="370" width="45" height="210" rx="6"/>
-        <rect class="region" data-region="thigh" data-label="THIGH/KNEE" x="205" y="370" width="45" height="210" rx="6"/>
-        <rect class="region" data-region="leg" data-label="LEG/FOOT" x="150" y="580" width="45" height="165" rx="6"/>
-        <rect class="region" data-region="leg" data-label="LEG/FOOT" x="205" y="580" width="45" height="165" rx="6"/>
+      <!-- viewBox uses real image aspect (225 x 360 approx → scaled) -->
+      <svg id="svgFront" viewBox="0 0 225 360" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+        <image href="assets/body_front.png" x="0" y="0" width="225" height="360" preserveAspectRatio="xMidYMid meet"/>
+        <!-- Clickable regions tuned to body_front.png proportions -->
+        <rect class="region" data-region="head" data-label="HEAD / JAW" x="92" y="5" width="42" height="48" rx="4"/>
+        <rect class="region" data-region="neck" data-label="NECK / CERVICAL" x="98" y="53" width="30" height="14" rx="3"/>
+        <rect class="region" data-region="shoulder" data-label="SHOULDER" x="68" y="67" width="92" height="28" rx="4"/>
+        <rect class="region" data-region="arm" data-label="UPPER ARM" x="47" y="95" width="24" height="62" rx="4"/>
+        <rect class="region" data-region="arm" data-label="UPPER ARM" x="156" y="95" width="24" height="62" rx="4"/>
+        <rect class="region" data-region="forearm" data-label="FOREARM / WRIST" x="42" y="157" width="24" height="58" rx="4"/>
+        <rect class="region" data-region="forearm" data-label="FOREARM / WRIST" x="160" y="157" width="24" height="58" rx="4"/>
+        <rect class="region" data-region="trunk" data-label="TRUNK / ABDOMEN" x="80" y="95" width="66" height="72" rx="4"/>
+        <rect class="region" data-region="hip" data-label="HIP / GROIN" x="82" y="167" width="62" height="26" rx="4"/>
+        <rect class="region" data-region="thigh" data-label="THIGH (FRONT)" x="80" y="193" width="31" height="70" rx="4"/>
+        <rect class="region" data-region="thigh" data-label="THIGH (FRONT)" x="115" y="193" width="31" height="70" rx="4"/>
+        <rect class="region" data-region="knee" data-label="KNEE" x="82" y="263" width="28" height="18" rx="4"/>
+        <rect class="region" data-region="knee" data-label="KNEE" x="116" y="263" width="28" height="18" rx="4"/>
+        <rect class="region" data-region="leg" data-label="SHIN / CALF" x="82" y="281" width="28" height="55" rx="4"/>
+        <rect class="region" data-region="leg" data-label="SHIN / CALF" x="116" y="281" width="28" height="55" rx="4"/>
+        <rect class="region" data-region="foot" data-label="FOOT / ANKLE" x="78" y="336" width="34" height="22" rx="4"/>
+        <rect class="region" data-region="foot" data-label="FOOT / ANKLE" x="114" y="336" width="34" height="22" rx="4"/>
       </svg>
 
       <!-- ========= BACK VIEW ========= -->
-      <svg id="svgBack" viewBox="0 0 400 780" xmlns="http://www.w3.org/2000/svg" class="hidden">
-        <!-- Anatomical body image (back view placeholder: same image flipped) -->
-        <image href="assets/body.png" x="40" y="10" width="320" height="760" preserveAspectRatio="xMidYMid meet" style="transform: scaleX(-1); transform-origin: 200px 390px;"/>
-
-        <!-- Spine -->
-        <path class="nerve-path" data-nerve="spine" d="M 200 140 L 200 420" style="stroke: rgba(212,168,87,.5);stroke-width:2;"/>
-        <!-- Suboccipital -->
-        <path class="nerve-path" data-nerve="suboccipital" d="M 175 110 Q 200 125 225 110"/>
-        <!-- Radial -->
-        <path class="nerve-path" data-nerve="radial" d="M 270 170 Q 300 220 315 280 Q 320 330 310 380"/>
-        <path class="nerve-path" data-nerve="radial-L" d="M 130 170 Q 100 220 85 280 Q 80 330 90 380"/>
-        <!-- Ulnar -->
-        <path class="nerve-path" data-nerve="ulnar" d="M 275 160 Q 305 210 318 270 Q 325 320 315 370 Q 310 400 303 430"/>
-        <path class="nerve-path" data-nerve="ulnar-L" d="M 125 160 Q 95 210 82 270 Q 75 320 85 370 Q 90 400 97 430"/>
-        <!-- Sciatic (left & right) -->
-        <path class="nerve-path" data-nerve="sciatic" d="M 170 340 Q 165 400 168 470 Q 170 530 172 580 Q 175 640 178 700"/>
-        <path class="nerve-path" data-nerve="sciatic-R" d="M 230 340 Q 235 400 232 470 Q 230 530 228 580 Q 225 640 222 700"/>
-        <!-- Tibial -->
-        <path class="nerve-path" data-nerve="tibial" d="M 178 700 Q 180 730 180 745"/>
-        <path class="nerve-path" data-nerve="tibial-R" d="M 222 700 Q 220 730 220 745"/>
-
-        <!-- REGIONS (back) -->
-        <rect class="region" data-region="head" data-label="OCCIPUT" x="160" y="30" width="80" height="95" rx="6"/>
-        <rect class="region" data-region="neck" data-label="CERVICAL" x="170" y="125" width="60" height="28" rx="4"/>
-        <rect class="region" data-region="upperback" data-label="UPPER BACK" x="120" y="150" width="160" height="110" rx="6"/>
-        <rect class="region" data-region="lowerback" data-label="LUMBAR" x="140" y="260" width="120" height="90" rx="6"/>
-        <rect class="region" data-region="arm" data-label="UPPER LIMB" x="65" y="205" width="50" height="170" rx="6"/>
-        <rect class="region" data-region="arm" data-label="UPPER LIMB" x="285" y="205" width="50" height="170" rx="6"/>
-        <rect class="region" data-region="forearm" data-label="ELBOW/FOREARM" x="85" y="375" width="35" height="100" rx="6"/>
-        <rect class="region" data-region="forearm" data-label="ELBOW/FOREARM" x="280" y="375" width="35" height="100" rx="6"/>
-        <rect class="region" data-region="glute" data-label="GLUTE/SI" x="145" y="350" width="110" height="60" rx="6"/>
-        <rect class="region" data-region="thigh" data-label="POST. THIGH" x="150" y="410" width="45" height="170" rx="6"/>
-        <rect class="region" data-region="thigh" data-label="POST. THIGH" x="205" y="410" width="45" height="170" rx="6"/>
-        <rect class="region" data-region="leg" data-label="CALF/ACHILLES" x="150" y="580" width="45" height="165" rx="6"/>
-        <rect class="region" data-region="leg" data-label="CALF/ACHILLES" x="205" y="580" width="45" height="165" rx="6"/>
+      <svg id="svgBack" viewBox="0 0 225 360" xmlns="http://www.w3.org/2000/svg" class="hidden" preserveAspectRatio="xMidYMid meet">
+        <image href="assets/body_back.png" x="0" y="0" width="225" height="360" preserveAspectRatio="xMidYMid meet"/>
+        <rect class="region" data-region="head" data-label="OCCIPUT" x="92" y="5" width="42" height="48" rx="4"/>
+        <rect class="region" data-region="neck" data-label="NECK / CERVICAL" x="98" y="53" width="30" height="14" rx="3"/>
+        <rect class="region" data-region="upperback" data-label="UPPER BACK" x="75" y="67" width="78" height="58" rx="4"/>
+        <rect class="region" data-region="lowerback" data-label="LOWER BACK / LUMBAR" x="80" y="125" width="68" height="42" rx="4"/>
+        <rect class="region" data-region="arm" data-label="UPPER ARM" x="47" y="95" width="24" height="62" rx="4"/>
+        <rect class="region" data-region="arm" data-label="UPPER ARM" x="156" y="95" width="24" height="62" rx="4"/>
+        <rect class="region" data-region="forearm" data-label="ELBOW / FOREARM" x="42" y="157" width="24" height="58" rx="4"/>
+        <rect class="region" data-region="forearm" data-label="ELBOW / FOREARM" x="160" y="157" width="24" height="58" rx="4"/>
+        <rect class="region" data-region="glute" data-label="GLUTE / SI JOINT" x="78" y="167" width="70" height="35" rx="4"/>
+        <rect class="region" data-region="thigh" data-label="POSTERIOR THIGH" x="78" y="202" width="32" height="62" rx="4"/>
+        <rect class="region" data-region="thigh" data-label="POSTERIOR THIGH" x="115" y="202" width="32" height="62" rx="4"/>
+        <rect class="region" data-region="knee" data-label="KNEE (POPLITEAL)" x="80" y="264" width="30" height="16" rx="4"/>
+        <rect class="region" data-region="knee" data-label="KNEE (POPLITEAL)" x="116" y="264" width="30" height="16" rx="4"/>
+        <rect class="region" data-region="leg" data-label="CALF / ACHILLES" x="82" y="280" width="28" height="56" rx="4"/>
+        <rect class="region" data-region="leg" data-label="CALF / ACHILLES" x="116" y="280" width="28" height="56" rx="4"/>
+        <rect class="region" data-region="foot" data-label="HEEL / ANKLE" x="78" y="336" width="34" height="22" rx="4"/>
+        <rect class="region" data-region="foot" data-label="HEEL / ANKLE" x="114" y="336" width="34" height="22" rx="4"/>
       </svg>
     </div>
 
@@ -606,12 +583,15 @@
     <div id="step1">
       <div class="step-label">◆ STEP 01 / 03</div>
       <div class="step-title">患者様の痛みが出る部位を選択</div>
-      <div class="help-text">
+      <div class="help-text desktop-only">
         左の人体図で、患者様が痛みを訴える部位をクリックしてください。該当部位の動作パターンが一覧表示されます。<br>
         前面 / 背面は右上のタブで切り替え可能です。
       </div>
+      <div class="help-text mobile-only">
+        ↑ 上の人体図で、患者様が痛みを訴える部位をタップしてください。該当部位の動作パターンがここに一覧表示されます。前面 / 背面は人体図の上のタブで切り替えられます。
+      </div>
       <div id="actionListWrap">
-        <div class="empty-hint">◀ 左の人体図から部位を選択してください</div>
+        <div class="empty-hint">◆ 人体図から部位を選択してください</div>
       </div>
     </div>
 
@@ -660,33 +640,16 @@ const REGION_CATEGORIES = {
   hip: ['lower_limb'],
   glute: ['spine_lumbar', 'lower_limb'],
   thigh: ['lower_limb'],
-  leg: ['lower_limb']
+  knee: ['lower_limb'],
+  leg: ['lower_limb'],
+  foot: ['lower_limb']
 };
 
-// Nerve keyword → SVG path data-nerve mapping for highlight
-const NERVE_HIGHLIGHT_MAP = {
-  '坐骨': ['sciatic', 'sciatic-R'],
-  '正中': ['median', 'median-L'],
-  '尺骨': ['ulnar', 'ulnar-L'],
-  '橈骨': ['radial', 'radial-L'],
-  '大腿神経': ['femoral', 'femoral-R'],
-  '脛骨': ['tibial', 'tibial-R', 'sciatic', 'sciatic-R'],
-  '腓骨': ['sciatic', 'sciatic-R'],
-  '腕神経叢': ['brachial', 'brachial-L'],
-  '腋窩': ['brachial', 'brachial-L'],
-  '筋皮': ['brachial', 'brachial-L'],
-  '肩甲上': ['brachial', 'brachial-L'],
-  '大後頭': ['suboccipital'],
-  '後頭': ['suboccipital'],
-  '副神経': ['suboccipital'],
-  '硬膜': ['spine'],
-  '神経根': ['spine'],
-  '椎間関節': ['spine'],
-  '馬尾': ['spine', 'sciatic', 'sciatic-R'],
-  '伏在': ['saphenous', 'saphenous-R', 'femoral', 'femoral-R'],
-  '閉鎖': ['femoral', 'femoral-R'],
-  '三叉': ['suboccipital']
-};
+function scrollToInfoPanel() {
+  if (window.innerWidth <= 900) {
+    document.querySelector('.info-panel').scrollIntoView({behavior: 'smooth', block: 'start'});
+  }
+}
 
 function loadDB() {
   DB = window.PAIN_DB;
@@ -714,12 +677,16 @@ function switchView(view) {
 function selectRegion(region, label) {
   currentRegion = region;
   document.querySelectorAll('.region.active').forEach(r => r.classList.remove('active'));
-  document.querySelectorAll(`[data-region="${region}"]`).forEach(r => r.classList.add('active'));
+  // Only activate regions within the currently visible SVG
+  const activeSvg = currentView === 'front' ? '#svgFront' : '#svgBack';
+  document.querySelectorAll(`${activeSvg} [data-region="${region}"]`).forEach(r => r.classList.add('active'));
   document.getElementById('hudStatus').textContent = 'REGION LOCKED';
+  document.getElementById('hudRegion').textContent = 'REGION: ' + label;
 
   const categories = REGION_CATEGORIES[region] || [];
   const actions = DB.actions.filter(a => categories.includes(a.category));
   renderActionList(actions, label);
+  scrollToInfoPanel();
 }
 
 function renderActionList(actions, regionLabel) {
@@ -791,25 +758,12 @@ function analyze() {
 
   candidates.sort((a, b) => b.adjusted - a.adjusted);
   renderResult(candidates);
-  highlightNerves(candidates[0].nerve);
 
   document.getElementById('step2').classList.add('hidden');
   document.getElementById('step3').classList.remove('hidden');
   document.getElementById('hudStatus').textContent = 'NEURAL MEMORY FOUND';
-}
-
-function highlightNerves(nerveName) {
-  document.querySelectorAll('.nerve-path.highlight').forEach(p => p.classList.remove('highlight'));
-  let matchedIds = [];
-  for (const [keyword, ids] of Object.entries(NERVE_HIGHLIGHT_MAP)) {
-    if (nerveName.includes(keyword)) {
-      matchedIds = matchedIds.concat(ids);
-    }
-  }
-  matchedIds.forEach(id => {
-    document.querySelectorAll(`[data-nerve="${id}"]`).forEach(p => p.classList.add('highlight'));
-  });
-  document.getElementById('hudNerveCount').textContent = matchedIds.length;
+  document.getElementById('hudNerveCount').textContent = candidates.length;
+  scrollToInfoPanel();
 }
 
 function renderResult(candidates) {
@@ -926,7 +880,7 @@ function goToStep1() {
   currentRegion = null;
   document.querySelectorAll('.region.active').forEach(r => r.classList.remove('active'));
   document.querySelectorAll('.nerve-path.highlight').forEach(p => p.classList.remove('highlight'));
-  document.getElementById('actionListWrap').innerHTML = '<div class="empty-hint">◀ 左の人体図から部位を選択してください</div>';
+  document.getElementById('actionListWrap').innerHTML = '<div class="empty-hint">◆ 人体図から部位を選択してください</div>';
   document.getElementById('hudStatus').textContent = 'READY';
   document.getElementById('hudNerveCount').textContent = '0';
   document.getElementById('hudRegion').textContent = 'REGION: —';
