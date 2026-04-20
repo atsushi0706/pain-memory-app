@@ -428,7 +428,16 @@
   }
   .info-panel .cta h3 { color: #ffd68a; }
   .info-panel .cta p { color: rgba(255,255,255,.88); }
-  .info-panel .cta-btn { background: #c9a961; color: #1a1a1a; }
+  .info-panel .cta-btn {
+    background: #c9a961; color: #1a1a1a;
+    padding: 16px 32px; font-size: 14px; letter-spacing: .08em;
+    box-shadow: 0 4px 20px rgba(212,168,87,.5);
+    transition: all .2s;
+  }
+  .info-panel .cta-btn:hover {
+    background: #e0c177; transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(212,168,87,.7);
+  }
   .info-panel .disclaimer { background: #fafafa; color: #666; border-left: 2px solid #ff6b6b; }
 
   /* ===== Video Chapter Style ===== */
@@ -818,7 +827,7 @@ function renderResult(candidates) {
         <div class="chapter-num">4</div>
         <div class="chapter-meta">
           <div class="chapter-kicker">CHAPTER 04</div>
-          <div class="chapter-title">動画マニュアルで学ぶべきポイント</div>
+          <div class="chapter-title">改善アプローチの方向性</div>
         </div>
         <div class="chapter-icon">▶</div>
       </div>
@@ -841,8 +850,8 @@ function renderResult(candidates) {
     </div>
 
     <div class="cta">
-      <h3>この神経を確実にリリースする手技は？</h3>
-      <a href="#" class="cta-btn" onclick="alert('※教材LPに差し替えてください');return false;">MANUAL を見る →</a>
+      <h3>この神経をリリースする手技を学びたいならこちら</h3>
+      <a href="https://www.3coremethod.com/peripheral_nerve_fe" class="cta-btn" target="_blank" rel="noopener">末梢神経リリース手技を学ぶ →</a>
     </div>
 
     <div class="disclaimer">
